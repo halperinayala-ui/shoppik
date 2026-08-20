@@ -2378,7 +2378,62 @@ const container = document.getElementById('personal-tasks-container');
             setTimeout(() => toast.remove(), 3000);
         }
 
-function openMomControlModal() {
+
+        // Delete & Manage Bonus Stars
+        function deleteBonusStar(bonusId) {
+            if (!state.bonusStars) return;
+            state.bonusStars = state.bonusStars.filter(b => b.id !== bonusId);
+            localStorage.setItem('mivtza_v12_bonus_stars', JSON.stringify(state.bonusStars));
+            saveData(true);
+            showNotification('🗑️ כוכבי הבונוס נמחקו בהצלחה!');
+            openManageBonusStarsModal();
+            if (state.activeChildId) openChildScreen(state.activeChildId);
+            else renderHomeKids();
+        }
+
+        function openManageBonusStarsModal() {
+            const modal = document.getElementById('app-modal');
+            document.getElementById('modal-title').textContent = '🎁 ניהול ומחיקת כוכבי בונוס';
+
+            const bonuses = state.bonusStars || [];
+
+            if (bonuses.length === 0) {
+                document.getElementById('modal-body').innerHTML = `
+                    <div style="text-align:center; padding:20px 0; color:#6B7280; font-weight:700;">
+                        אין כרגע כוכבי בונוס שניתנו.
+                    </div>
+                    <button class="modal-submit-btn" style="background:#6366F1;" onclick="openMomControlModal()">חזרה ללוח הבקרה</button>
+                `;
+                modal.classList.add('active');
+                return;
+            }
+
+            let html = '<div style="display:flex; flex-direction:column; gap:10px; max-height:350px; overflow-y:auto; padding-left:4px;">';
+
+            bonuses.slice().reverse().forEach(b => {
+                const childObj = defaultChildren.find(c => c.id === b.childId);
+                const childName = childObj ? childObj.name : (b.childName || b.childId);
+                html += `
+                    <div style="background:#FFFBEB; border:1.5px solid #F59E0B; border-radius:16px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="text-align:right;">
+                            <div style="font-weight:900; color:#B45309; font-size:1.05rem;">+${b.stars} ⭐ ל${childName}</div>
+                            <div style="font-size:0.9rem; color:#78350F; font-weight:700; margin-top:2px;">${b.reason}</div>
+                            <div style="font-size:0.75rem; color:#92400E; opacity:0.8;">${b.dateStr || ('יום ' + b.dayNum)}</div>
+                        </div>
+                        <button style="background:#EF4444; color:white; border:none; border-radius:12px; padding:8px 14px; font-weight:900; cursor:pointer; font-size:0.9rem; white-space:nowrap;" onclick="deleteBonusStar('${b.id}')">🗑️ מחק</button>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            html += '<button class="modal-submit-btn" style="background:#6366F1; margin-top:14px;" onclick="openMomControlModal()">חזרה ללוח הבקרה</button>';
+
+            document.getElementById('modal-body').innerHTML = html;
+            modal.classList.add('active');
+        }
+
+
+        function openMomControlModal() {
             
             const modal = document.getElementById('app-modal');
             document.getElementById('modal-title').textContent = '👑 לוח הבקרה למאמי & טאטי';
