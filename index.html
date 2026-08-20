@@ -1725,29 +1725,26 @@ const dayNames = [
 
         function getCategorizedTasksForChildAndDay(childId, dayNum) {
             if (childId === 'reisha') return toddlerCategorizedTasks;
-            return (dayNum === 2) ? olderKidsFridayTasks : olderKidsStandardTasks;
-        }
 
-        // State initialized from localStorage or defaults
-        let state = {
-            currentDay: calculateAutoDayFromCalendar(),
-            activeChildId: null,
-            children: defaultChildren,
-            completedTasks: JSON.parse(localStorage.getItem('mivtza_v12_completed')) || {},
-            tatiMessages: JSON.parse(localStorage.getItem('mivtza_v12_tati_msgs')) || []
-        };
+            const baseCat = (dayNum === 2) ? olderKidsFridayTasks : olderKidsStandardTasks;
 
-        
-        // Google Sheets Integration
-        let googleSheetsUrl = localStorage.getItem('mivtza_sheet_url') || 'https://script.google.com/macros/s/AKfycbz-X6ipEcLb-J2BiOy6w3iuxvQUBIu1lrqNXKI9XnOeBJj8_17mV9hyxr0HcLBgfavTAQ/exec';
-        if (!localStorage.getItem('mivtza_sheet_url')) localStorage.setItem('mivtza_sheet_url', 'https://script.google.com/macros/s/AKfycbz-X6ipEcLb-J2BiOy6w3iuxvQUBIu1lrqNXKI9XnOeBJj8_17mV9hyxr0HcLBgfavTAQ/exec');
-
-        function initSheetsInput() {
-            if (!googleSheetsUrl) googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbz-X6ipEcLb-J2BiOy6w3iuxvQUBIu1lrqNXKI9XnOeBJj8_17mV9hyxr0HcLBgfavTAQ/exec';
-            const input = document.getElementById('sheets-url-input');
-            if (input && googleSheetsUrl) {
-                input.value = googleSheetsUrl;
+            // Bed making task: starting Friday (day 2), excluding Sunday (day 4)
+            if (dayNum >= 2 && dayNum !== 4) {
+                return baseCat.map(cat => {
+                    if (cat.typeKey === 'morning') {
+                        const hasBed = cat.tasks.some(t => t.id === 't_bed');
+                        if (!hasBed) {
+                            return {
+                                ...cat,
+                                tasks: [...cat.tasks, { id: 't_bed', text: 'סידרתי את המיטה', emoji: '🛏️' }]
+                            };
+                        }
+                    }
+                    return cat;
+                });
             }
+
+            return baseCat;
         }
 
         function saveSheetsUrl() {
