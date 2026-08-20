@@ -747,7 +747,31 @@
         }
 
         /* Mom/Tati Control Button */
-        .mom-gear-btn {
+        
+/* ULTRA TOUCH RESPONSIVE MOM GEAR BUTTON */
+.mom-gear-btn {
+    position: fixed !important;
+    bottom: 24px !important;
+    left: 24px !important;
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #312E81 0%, #4338CA 100%) !important;
+    color: white !important;
+    font-size: 1.85rem !important;
+    border: 3px solid white !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 8px 25px rgba(49, 46, 129, 0.45) !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+}
+
+.mom-gear-btn {
             position: fixed;
             bottom: 22px;
             left: 22px;
@@ -2361,6 +2385,9 @@ function openMomControlModal() {
 
             document.getElementById('modal-body').innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="modal-submit-btn" style="background: linear-gradient(135deg, #F59E0B, #D97706); color: white; font-weight: 900;" onclick="openBonusStarsModal()">
+                        🎁 הענקת כוכבי בונוס לילד/ה (⭐ +1, +2, +3, +5)
+                    </button>
                     <button class="modal-submit-btn" style="background: #6366F1;" onclick="openTatiMessageModal()">
                         💌 שליחת הודעה מטאטי לילדים
                     </button>
@@ -2370,7 +2397,37 @@ function openMomControlModal() {
                     <button class="modal-submit-btn" style="background: #E11D48;" onclick="resetTodayTasksModal()">
                         🔄 איפוס משימות של היום הנוכחי (${dayNames[state.currentDay - 1]})
                     </button>
-                                    </div>
+                </div>
+            `;
+            modal.classList.add('active');
+        }
+
+        function openBonusStarsModal() {
+            const modal = document.getElementById('app-modal');
+            document.getElementById('modal-title').textContent = '🎁 הענקת כוכבי בונוס';
+
+            let optionsHtml = defaultChildren.map(c => `<option value="${c.id}">ל${c.name}</option>`).join('');
+
+            document.getElementById('modal-body').innerHTML = `
+                <div style="text-align: right;">
+                    <label style="font-weight: 800; font-size: 0.95rem; color: var(--text-dark); display: block; margin-bottom: 4px;">בחר/י ילד/ה:</label>
+                    <select id="bonus-child-select" class="tati-select-input" style="margin-bottom: 12px;">
+                        ${optionsHtml}
+                    </select>
+
+                    <label style="font-weight: 800; font-size: 0.95rem; color: var(--text-dark); display: block; margin-bottom: 4px;">כמות כוכבי בונוס:</label>
+                    <select id="bonus-stars-count" class="tati-select-input" style="margin-bottom: 12px;">
+                        <option value="1">+1 ⭐ כוכב אחד</option>
+                        <option value="2">+2 ⭐⭐ שני כוכבים</option>
+                        <option value="3">+3 ⭐⭐⭐ שלושה כוכבים</option>
+                        <option value="5">+5 ⭐⭐⭐⭐⭐ חמישה כוכבים!</option>
+                    </select>
+
+                    <label style="font-weight: 800; font-size: 0.95rem; color: var(--text-dark); display: block; margin-bottom: 4px;">סיבת הבונוס:</label>
+                    <input type="text" id="bonus-reason-input" class="tati-select-input" placeholder="למשל: עזרת יפה מאוד לנקות, ויתור מקסים..." style="margin-bottom: 16px;">
+
+                    <button class="modal-submit-btn" style="background: linear-gradient(135deg, #F59E0B, #D97706); color: white; font-weight: 900; width: 100%;" onclick="addBonusStarsFromMom()">🎁 הענק כוכבי בונוס! ⭐</button>
+                </div>
             `;
             modal.classList.add('active');
         }
