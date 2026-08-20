@@ -2434,7 +2434,6 @@ const container = document.getElementById('personal-tasks-container');
 
 
         function openMomControlModal() {
-            
             const modal = document.getElementById('app-modal');
             document.getElementById('modal-title').textContent = '👑 לוח הבקרה למאמי & טאטי';
 
@@ -2444,6 +2443,9 @@ const container = document.getElementById('personal-tasks-container');
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button class="modal-submit-btn" style="background: linear-gradient(135deg, #F59E0B, #D97706); color: white; font-weight: 900;" onclick="openBonusStarsModal()">
                         🎁 הענקת כוכבי בונוס לילד/ה (⭐ +1, +2, +3, +5)
+                    </button>
+                    <button class="modal-submit-btn" style="background: #D97706; color: white; font-weight: 900;" onclick="openManageBonusStarsModal()">
+                        🗑️ ניהול ומחיקת כוכבי בונוס שנרשמו
                     </button>
                     <button class="modal-submit-btn" style="background: #6366F1;" onclick="openTatiMessageModal()">
                         💌 שליחת הודעה מטאטי לילדים
