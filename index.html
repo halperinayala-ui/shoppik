@@ -1618,6 +1618,7 @@ header {
                 playFanfareSound();
                 renderTatiMessagesForChild(childId);
             renderBonusStarsForChild(childId);
+ renderBonusStarsForChild(childId);
                 renderHomeKids();
 
                 const toast = document.createElement('div');
@@ -2058,8 +2059,8 @@ const dayNames = [
             `;
 
             renderTatiMessagesForChild(childId);
-
-            const container = document.getElementById('personal-tasks-container');
+            renderBonusStarsForChild(childId);
+const container = document.getElementById('personal-tasks-container');
 
             if (state.currentDay === 3) {
                 container.innerHTML = `
