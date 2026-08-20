@@ -1787,50 +1787,28 @@ const dayNames = [
         function pushStateToCloud() {
             if (!googleSheetsUrl) googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbz-X6ipEcLb-J2BiOy6w3iuxvQUBIu1lrqNXKI9XnOeBJj8_17mV9hyxr0HcLBgfavTAQ/exec';
             isSyncing = true;
+
+            // Save state locally first
+            saveState();
+
+            const payload = JSON.stringify(state);
+
+            // 1. Send via POST fetch (Standard)
             fetch(googleSheetsUrl, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(state)
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: payload
             })
-            .catch(() => {})
+            .catch(err => console.log('POST Sync error:', err))
             .finally(() => { isSyncing = false; });
-        }
-  
-        
-        function fetchStateFromCloud() {
-            if (isSyncing) return;
-            if (!googleSheetsUrl) googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbz-X6ipEcLb-J2BiOy6w3iuxvQUBIu1lrqNXKI9XnOeBJj8_17mV9hyxr0HcLBgfavTAQ/exec';
-            
-            fetch(googleSheetsUrl)
-            .then(r => r.json())
-            .then(d => {
-                if (d && (d.completedTasks || d.tatiMessages || d.data)) {
-                    const incoming = d.data || d;
-                    const inTasks = incoming.completedTasks || {};
-                    const inMsgs = incoming.tatiMessages || [];
-                    const inDay = incoming.currentDay || 1;
-                    
-                    let updated = false;
-                    if (JSON.stringify(inTasks) !== JSON.stringify(state.completedTasks)) {
-                        state.completedTasks = inTasks;
-                        updated = true;
-                    }
-                    if (JSON.stringify(inMsgs) !== JSON.stringify(state.tatiMessages)) {
-                        state.tatiMessages = inMsgs;
-                        updated = true;
-                    }
-                    if (inDay !== state.currentDay) {
-                        state.currentDay = inDay;
-                        updated = true;
-                    }
-                    if (updated) {
-                        saveData(false);
-                        if (state.activeChildId) openChildScreen(state.activeChildId);
-                        else renderHomeKids();
-                    }
-                }
-            })
+
+            // 2. Send via GET parameter fallback (Guaranteed mobile browser sync)
+            try {
+                const getBackupUrl = googleSheetsUrl + '?data=' + encodeURIComponent(payload);
+                fetch(getBackupUrl, { mode: 'no-cors' }).catch(() => {});
+            } catch(e) {}
+        })
             .catch(() => {});
         }
   
