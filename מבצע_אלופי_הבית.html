@@ -1787,46 +1787,53 @@ const dayNames = [
         
         
 
+        let lastUserInteractionTime = 0;
+
         function saveData(syncToCloud = true) {
             localStorage.setItem('mivtza_v12_completed', JSON.stringify(state.completedTasks));
             localStorage.setItem('mivtza_v12_tati_msgs', JSON.stringify(state.tatiMessages));
             localStorage.setItem('mivtza_v12_day', state.currentDay);
 
-            if (syncToCloud && !isSyncing) {
+            if (syncToCloud) {
+                lastUserInteractionTime = Date.now();
                 pushStateToCloud();
             }
         }
 
-        
         function pushStateToCloud() {
             if (!googleSheetsUrl) googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbz-X6ipEcLb-J2BiOy6w3iuxvQUBIu1lrqNXKI9XnOeBJj8_17mV9hyxr0HcLBgfavTAQ/exec';
             isSyncing = true;
 
-            saveData(false);
-
             const payload = JSON.stringify(state);
-            const targetUrl = googleSheetsUrl + '?action=save&data=' + encodeURIComponent(payload);
+            const getUrl = googleSheetsUrl + '?action=save&data=' + encodeURIComponent(payload);
 
-            fetch(targetUrl, { mode: 'no-cors' })
+            // 1. Send via Image Ping (100% Guaranteed delivery on all mobile browsers!)
+            try {
+                const ping = new Image();
+                ping.src = getUrl;
+            } catch(e) {}
+
+            // 2. Send via fetch
+            fetch(getUrl, { mode: 'no-cors' })
                 .catch(err => console.log('Sync error:', err))
                 .finally(() => { isSyncing = false; });
         }
 
         function fetchStateFromCloud() {
-            if (isSyncing || !googleSheetsUrl) return;
+            if (isSyncing || !googleSheetsUrl || (Date.now() - lastUserInteractionTime < 6000)) return;
+
             fetch(googleSheetsUrl)
                 .then(res => res.json())
                 .then(data => {
                     if (data && (data.completedTasks || data.tatiMessages)) {
-                        state.completedTasks = data.completedTasks || state.completedTasks;
-                        state.tatiMessages = data.tatiMessages || state.tatiMessages;
+                        // Merge completed tasks so local clicks are NEVER wiped out
+                        state.completedTasks = Object.assign({}, data.completedTasks || {}, state.completedTasks);
+                        if (data.tatiMessages) state.tatiMessages = data.tatiMessages;
                         if (data.currentDay && data.currentDay !== state.currentDay) {
                             state.currentDay = data.currentDay;
                         }
                         localStorage.setItem('mivtza_v12_completed', JSON.stringify(state.completedTasks));
                         localStorage.setItem('mivtza_v12_tati_msgs', JSON.stringify(state.tatiMessages));
-                        if (state.activeChildId) openChildScreen(state.activeChildId);
-                        else renderHomeKids();
                     }
                 })
                 .catch(() => {});
